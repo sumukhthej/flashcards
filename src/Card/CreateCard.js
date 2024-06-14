@@ -1,11 +1,12 @@
 import {useEffect, useState} from "react";
-import {useNavigate, useParams} from "react-router-dom";
-import {createCard, readDeck} from "../utils/api";
+import {useLocation, useNavigate, useParams} from "react-router-dom";
+import {createCard, readCard, readDeck, updateCard} from "../utils/api";
 import "./CreateCard.css"
 import React from "react";
 
 function CreateCard() {
-    const {deckId} = useParams();
+    const {deckId, cardId} = useParams();
+    const location = useLocation();
 
     const initialCardData = {front: '', back: ''}
     const navigate = useNavigate();
@@ -15,22 +16,30 @@ function CreateCard() {
 
     useEffect(() => {
         const abortController = new AbortController();
-
-        async function fetchDeck() {
-            try {
-                const res = await readDeck(deckId, abortController.signal);
-                setDeckInfo(res);
-            } catch (error) {
-                console.error('Error fetching deck info:', error);
+        if (location.pathname.includes('new')) {
+            async function fetchDeck() {
+                try {
+                    const res = await readDeck(deckId, abortController.signal);
+                    setDeckInfo(res);
+                } catch (error) {
+                    console.error('Error fetching deck info:', error);
+                }
             }
-        }
 
-        if (deckId) {
-            fetchDeck();
+            if (deckId) {
+                fetchDeck();
+            } else {
+                console.error('deckId is not defined');
+            }
         } else {
-            console.error('deckId is not defined');
+            readCard(cardId, abortController.signal)
+                .then((res) => {
+                    setCard(res);
+                    document.getElementById('card-front').value = res.front;
+                    document.getElementById('card-back').value = res.back;
+                })
+                .catch(() => navigate("/"));
         }
-
         return () => {
             abortController.abort();
         };
@@ -38,12 +47,21 @@ function CreateCard() {
 
     const saveHandle = (event) => {
         if (card.back !== '' && card.front !== '') {
-            createCard(deckId, card, abortController.signal)
-                .then((res) => console.log(res))
-
-            setCard({...initialCardData});
+            if (location.pathname.includes('new')) {
+                createCard(deckId, card, abortController.signal)
+                    .then((res) => {
+                        console.log(res);
+                        setCard({ ...initialCardData });
+                    })
+                    .catch((error) => console.error(error));
+            } else {
+                event.preventDefault();
+                updateCard(card, abortController.signal)
+                    .then((res) => console.log(res))
+                setTimeout(() => navigate(`/decks/${deckId}`), 10);
+            }
         }
-    }
+    };
 
     const doneHandle = (event) => {
         navigate(`/decks/${deckId}`);
@@ -61,7 +79,7 @@ function CreateCard() {
 
     return (
         <form className={"create-card"}>
-            <h2>{deckInfo.name}: Add Card</h2>
+            <h2>{location.pathname.includes('new')? (`${deckInfo.name}: Add Card`): `Edit Card`}</h2>
             <label htmlFor={"card-front"}>
                 Front:
                 <textarea
@@ -84,8 +102,12 @@ function CreateCard() {
                 />
             </label>
             <div>
-                <button type="cancel" className={"cancel btn"} onClick={doneHandle}>Done</button>
-                <button type="submit" className={"submit btn"} onClick={saveHandle}>Save</button>
+                <button type="cancel" className={"cancel btn"} onClick={doneHandle}>
+                    {location.pathname.includes('new')? "Done" : "Cancel"}
+                </button>
+                <button type="submit" className={"submit btn"} onClick={saveHandle}>
+                    {location.pathname.includes('new')? "Save" : "Submit"}
+                </button>
             </div>
         </form>
     )

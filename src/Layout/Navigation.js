@@ -10,9 +10,11 @@ function Navigation() {
     const [deckName, setDeckName] = useState(null);
 
     useEffect(() => {
-        readDeck(deckId, abortController.signal)
-            .then((res) => setDeckName(res.name))
-            .catch(console.error);
+        if(deckId) {
+            readDeck(deckId, abortController.signal)
+                .then((res) => setDeckName(res.name))
+                .catch(console.error);
+        }
     })
 
     const breadcrumbs = () => {

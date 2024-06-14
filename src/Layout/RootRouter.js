@@ -8,7 +8,6 @@ import CreateCard from "../Card/CreateCard";
 import Navigation from "./Navigation";
 import React from "react";
 import EditDeck from "../Deck/EditDeck";
-import EditCard from "../Card/EditCard";
 
 function RootRouter() {
     return (
@@ -21,7 +20,7 @@ function RootRouter() {
                     <Route path={"/decks/:deckId/edit"} element={<EditDeck />} />
                     <Route path={"/decks/:deckId/study"} element={<StudyView />} />
                     <Route path={"/decks/:deckId/cards/new"} element={<CreateCard />} />
-                    <Route path={"/decks/:deckId/cards/:cardId/edit"} element={<EditCard />} />
+                    <Route path={"/decks/:deckId/cards/:cardId/edit"} element={<CreateCard />} />
                     <Route path={"*"} element={<NotFound />}/>
                 </Route>
             </Routes>
