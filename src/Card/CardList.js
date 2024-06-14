@@ -7,16 +7,16 @@ function CardList({cards}) {
     if(!cards || cards.length < 0) {
         return null;
     }
-    const cardList = cards.map((card) => (<CardItem card={card}/>))
+    const cardList = cards.map((card) => (<CardItem key={card.id} card={card}/>))
 
     return (cardList)?
-        (
-        <section className={"card-list"}>
-            <h2>Cards</h2>
-            {cardList}
-        </section>
-    ):
-        <></>
+            (
+            <section className={"card-list"}>
+                <h2>Cards</h2>
+                {cardList}
+            </section>
+            ):
+        null
 }
 
 export default CardList;
